@@ -6,7 +6,7 @@ let session;
 const roleLabel = {viewer: 'Público', editor: 'Funcionario', admin: 'Administrador'};
 
 function tell(text, error = false) { message.textContent = ` ${text}`; message.className = `mt-4 min-h-6 text-sm ${error ? 'text-red-700' : 'text-emerald-700'}`; }
-function headers(extra = {}) { return {...extra, Authorization: `Basic ${sessionStorage.documentAuth || ''}`}; }
+function headers(extra = {}) { return {...extra, Authorization: `Bearer ${sessionStorage.documentAuth || ''}`}; }
 function escapeHtml(value) { return String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char])); }
 async function request(url, options = {}) {
   const response = await fetch(url, {...options, headers: headers(options.headers)}); const data = await response.json();
