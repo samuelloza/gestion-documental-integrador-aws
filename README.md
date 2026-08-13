@@ -4,21 +4,6 @@ Proyecto Python para el laboratorio DCM 602. Expone una API JSON y un frontend e
 
 ## Arquitectura
 
-### Infraestructura desplegada
-
-```mermaid
-flowchart LR
-  U[Usuario] --> CF[CloudFront]
-  CF --> WEB[S3: portal estático]
-  CF --> API[EC2: API Python]
-  API -->|rol IAM: objetos documents/*| DOCS[S3: documentos privado]
-  API -->|5432, SG a SG| RDS[(RDS PostgreSQL privado)]
-  U -->|inicio de sesión| COG[Cognito]
-  API -->|valida JWT y grupos| COG
-  SM[Secrets Manager] -->|credencial RDS| API
-```
-
-### Código
 
 ```mermaid
 flowchart LR
