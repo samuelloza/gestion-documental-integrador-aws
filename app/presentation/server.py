@@ -61,7 +61,7 @@ class ApiApplication:
         parts = [part for part in path.split("/") if part]
         if not parts or parts[0] != "api":
             if path == "/docs":
-                path = "/swagger.html"
+                return self.static(start, "/swagger.html", Path(__file__).parent)
             return self.static(start, path)
         if parts == ["api", "openapi.json"] and method == "GET":
             return self.json(start, HTTPStatus.OK, self.openapi())
@@ -147,9 +147,10 @@ class ApiApplication:
         start("200 OK", [("Content-Type", content_type), ("Content-Length", str(len(body)))])
         return [body]
 
-    def static(self, start, path):
-        target = self.static_dir / ("index.html" if path == "/" else path.lstrip("/"))
-        if not target.is_file() or self.static_dir not in target.resolve().parents and target.resolve() != self.static_dir:
+    def static(self, start, path, root=None):
+        root = root or self.static_dir
+        target = root / ("index.html" if path == "/" else path.lstrip("/"))
+        if not target.is_file() or root not in target.resolve().parents and target.resolve() != root:
             return self.json(start, HTTPStatus.NOT_FOUND, {"error": "not found"})
         body = target.read_bytes()
         start("200 OK", [("Content-Type", mimetypes.guess_type(str(target))[0] or "application/octet-stream"), ("Content-Length", str(len(body)))])
