@@ -64,6 +64,22 @@ class ApiTests(unittest.TestCase):
         self.assertEqual((status, headers['Content-Type']), (200, 'text/html'))
         self.assertIn(b'<title>Documentos | Gesti', body)
 
+    def test_serves_openapi_spec_and_swagger_ui_without_authentication(self):
+        env = {}; setup_testing_defaults(env)
+        env.update(REQUEST_METHOD='GET', PATH_INFO='/api/openapi.json', CONTENT_LENGTH='0', **{'wsgi.input': io.BytesIO()})
+        captured = {}; spec = json.loads(b''.join(self.app(env, lambda status, headers: captured.update(status=status, headers=dict(headers)))))
+        self.assertEqual((int(captured['status'][:3]), spec['openapi']), (200, '3.0.3'))
+        self.assertEqual(set(spec['paths']), {'/api/health', '/api/openapi.json', '/api/session', '/api/documents', '/api/documents/{id}', '/api/documents/{id}/content'})
+        status, _, body = self.call_body('GET', '/docs')
+        self.assertEqual(status, 200)
+        self.assertIn(b'/api/openapi.json', body)
+
+    def test_logs_each_request_without_credentials(self):
+        with self.assertLogs('app.presentation.server', 'INFO') as logs:
+            self.call('GET', '/api/documents')
+        self.assertIn('request method=GET path=/api/documents status=200', logs.output[0])
+        self.assertNotIn('test-password', logs.output[0])
+
     def test_rejects_duplicate_folio(self):
         payload = b'{"folio":"F-1","name":"Contrato","document_type":"pdf"}'
         self.call('POST', '/api/documents', payload)
