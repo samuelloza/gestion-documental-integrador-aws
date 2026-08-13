@@ -1,5 +1,5 @@
 window.APP_CONFIG = {
   apiBaseUrl: '',
-  cognitoClientId: '5a5eqcm3j4du7as685r8gh3bbf',
+  cognitoClientId: '',
   cognitoRegion: 'us-east-1'
 };
