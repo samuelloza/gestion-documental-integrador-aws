@@ -6,6 +6,8 @@ import os
 import base64
 import tempfile
 import unittest
+import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 from wsgiref.util import setup_testing_defaults
 
@@ -15,6 +17,7 @@ from app.infrastructure.repositories import SQLiteDocuments
 from app.presentation.auth import AuthenticationError, BasicAuthenticator, CognitoAuthenticator, hash_password
 from app.presentation.server import ApiApplication
 from app.config import Settings
+from app.domain import Document
 from app.seeds import seed_documents
 
 
@@ -52,6 +55,11 @@ class ApiTests(unittest.TestCase):
         status, _ = self.call('DELETE', f'/api/documents/{identifier}')
         self.assertEqual(status, 200)
         self.assertEqual(self.call('GET', f'/api/documents/{identifier}')[0], 404)
+
+    def test_document_public_serializes_postgres_values(self):
+        now = datetime.now(timezone.utc)
+        document = Document(uuid.uuid4(), 'F-uuid', 'Acta', 'pdf', 'ACTIVE', now, now)
+        self.assertEqual(json.loads(json.dumps(document.public()))['id'], str(document.id))
 
     def test_gets_local_document_content(self):
         _, doc = self.call('POST', '/api/documents', b'{"folio":"F-2","name":"Contrato","document_type":"pdf"}')

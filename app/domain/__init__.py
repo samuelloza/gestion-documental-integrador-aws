@@ -22,7 +22,12 @@ class Document:
     size_bytes: int | None = None
 
     def public(self) -> dict:
-        return asdict(self)
+        data = asdict(self)
+        data["id"] = str(data["id"])
+        for field in ("created_at", "updated_at"):
+            if isinstance(data[field], datetime):
+                data[field] = data[field].isoformat()
+        return data
 
 
 class NotFoundError(Exception):
